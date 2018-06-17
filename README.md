@@ -1,1 +1,1 @@
-GitHub Repository for DSC 510 - Bellevue University
+# GitHub Repository for DSC 520 - Bellevue University
