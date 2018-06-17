@@ -1,0 +1,48 @@
+---
+title: "DSC 520 Assignment 2.2 - Weather Data"
+author: "Demond Love"
+date: "6/17/2018"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**A friend of yours is thinking about moving to another city in the U.S. The cities being considered are Pierre, SD, Bakersfield, CA, and Charleston, SC.  Knowing that you are working on your data science skills, your friend asks you for help. Although the number of cities has already been determined, your friend only provides you with the following questions that they want explored to help make a decision.**
+
+**You have decided to utilize a Stripchart to begin making some recommendations for your friend. Note: An example script has been started for you to use but you will need to modify it to complete the assignment. Begin by opening the Assignment 2 Script.**
+
+**Save each of your Plots so a comparison can be made and referenced in your answers.**
+**The source of data for this assignment originated from the following link: https://www.ncdc.noaa.gov/cdo-web/**
+
+```{r}
+caweather <- read.csv("caweather.csv")
+stripchart(caweather$TMAX, method="jitter", main="Backersfield, CA February High Temps",ylab="Count", xlab="Temperatures")
+```
+```{r}
+scweather <- read.csv("scweather.csv")
+stripchart(scweather$TMAX, method="jitter", main="Charleston, SC February High Temps",ylab="Count", xlab="Temperatures")
+```
+```{r}
+sdweather <- read.csv("sdweather.csv")
+stripchart(sdweather$Tmax, method="jitter", main="Pierre, SD February High Temps",ylab="Count", xlab="Temperatures")
+```
+
+**Which city tended to have the highest temperatures in February?**
+
+Charleston, SC tended to have the highest tempertures, as shown by the clustering of values to the right of the scatterplot and the scale of the x-axis having the 80 degree mark, in order to compensate for the very high values to the right of the plot.
+
+**Which city tended to have the lowest temperatures? Describe how you can tell.**
+
+Pierre, SD tended to have the lowest tempertures, as shown by the scale of the x-axis having the 10 degree mark, in order to compensate for the very low values to the left of the plot.
+
+**Which city had the most day-to-day consistency in its high temperatures in February? Which city had the least? Explain how you can tell.**
+
+```{r}
+sd(caweather$TMAX)
+sd(scweather$TMAX)
+sd(sdweather$Tmax)
+```
+Charleston, SC is the city with the most day-to-day consistency and Pierre, CD is the city with the least day-to-day consistency. This is evidenced by the Charleston having the lowest standard devation and Pierre having the highest standard deviation. The standard deviation is a descriptive statistic that allows us to assign a single number to the dispersion of the data around the mean. Therefore, in this case, it can be used to distingush the consistency of the tempetures amoung the cities.
+
