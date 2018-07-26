@@ -1,0 +1,116 @@
+---
+title: "DSC 520 Week 7 Classification"
+author: "Demond Love"
+date: "7/22/2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###Regression algorithms are used to predict numeric quantity while classification algorithms predict categorical outcomes. A spam filter is an example use case for a classification algorithm. The input dataset is emails labeled as either spam (i.e. junk emails) or ham (i.e. good emails). The classification algorithm uses features extracted from the emails to learn which emails fall into which category.###
+
+###In this problem, you will use the nearest neighbors algorithm to fit a model on two simplified datasets. The first dataset (found in binary-classifier-data.csv) contains three variables; label, x, and y. The label variable is either 0 or 1 and is the output we want to predict using the x and y variables. The second dataset (found in trinary-classifier-data.csv) is similar to the first dataset except for the label variable can be 0, 1, or 2.###
+
+###Note that in real-world datasets, your labels are usually not numbers, but text-based descriptions of the categories (e.g. spam or ham). In practice, you will encode categorical variables into numeric values.###
+
+```{r, results='hide', warning = FALSE, message = FALSE}
+library(ggplot2)
+library(class)
+setwd('/Users/Love/Documents/DSC 520 Statistics for Data Science/Week 7 DSC 520')
+binary = read.csv('./binary-classifier-data.csv')
+trinary = read.csv('./binary-classifier-data.csv')
+```
+
+###a. Plot the data from each dataset using a scatter plot.###
+
+```{r}
+ggplot(binary, aes(x, y)) + geom_point()
+# ggplot(trinary, aes(x, y)) + geom_point()
+```
+
+###b. The k nearest neighbors algorithm categorizes an input value by looking at the labels for the k nearest points and assigning a category based on the most common label. In this problem, you will determine which points are nearest by calculating the Euclidean distance between two points. As a refresher, the Euclidean distance between two points: p1=(x1, y1) and p2=(x2,y2) is d = sqrt((x1, y1)^2 + (x2,y2)^2)###
+
+###Fitting a model is when you use the input data to create a predictive model. There are various metrics you can use to determine how well your model fits the data. You will learn more about these metrics in later lessons. For this problem, you will focus on a single metric; accuracy. Accuracy is simply the percentage of how often the model predicts the correct result. If the model always predicts the correct result, it is 100% accurate. If the model always predicts the incorrect result, it is 0% accurate.###
+
+```{r}
+binary$label = as.factor(binary$label)
+
+binary_train = binary[1:1198,2:3]
+binary_test = binary[1199:1498,2:3]
+binary_train_z = as.data.frame(lapply(binary_train, scale))
+binary_test_z = as.data.frame(lapply(binary_test, scale))
+binary_train_labels = binary[1:1198,1]
+binary_test_labels = binary[1199:1498,1]
+```
+
+```{r}
+trinary$label = as.factor(trinary$label)
+
+trinary_train = trinary[1:1198,2:3]
+trinary_test = trinary[1199:1498,2:3]
+trinary_train_z = as.data.frame(lapply(trinary_train, scale))
+trinary_test_z = as.data.frame(lapply(trinary_test, scale))
+trinary_train_labels = trinary[1:1198,1]
+trinary_test_labels = trinary[1199:1498,1]
+```
+
+###Fit a k nearest neighbors model for each dataset for k=3, k=5, k=10, k=15, k=20, and k=25. Compute the accuracy of the resulting models for each value of k. Plot the results in a graph where the x-axis is the different values of k and the y-axis is the accuracy of the model.###
+
+```{r}
+binary_test_pred3 = knn(train = binary_train, test = binary_test, cl = binary_train_labels, k = 3)
+binary_test_pred5 = knn(train = binary_train, test = binary_test, cl = binary_train_labels, k = 5)
+binary_test_pred10 = knn(train = binary_train, test = binary_test, cl = binary_train_labels, k = 10)
+binary_test_pred15 = knn(train = binary_train, test = binary_test, cl = binary_train_labels, k = 15)
+binary_test_pred20 = knn(train = binary_train, test = binary_test, cl = binary_train_labels, k = 20)
+binary_test_pred25 = knn(train = binary_train, test = binary_test, cl = binary_train_labels, k = 25)
+```
+
+```{r}
+trinary_test_pred3 = knn(train = trinary_train_z, test = trinary_test, cl = trinary_train_labels, k = 3)
+trinary_test_pred5 = knn(train = trinary_train_z, test = trinary_test, cl = trinary_train_labels, k = 5)
+trinary_test_pred10 = knn(train = trinary_train_z, test = trinary_test, cl = trinary_train_labels, k = 10)
+trinary_test_pred15 = knn(train = trinary_train_z, test = trinary_test, cl = trinary_train_labels, k = 15)
+trinary_test_pred20 = knn(train = trinary_train_z, test = trinary_test, cl = trinary_train_labels, k = 20)
+trinary_test_pred25 = knn(train = trinary_train_z, test = trinary_test, cl = trinary_train_labels, k = 25)
+```
+
+```{r}
+binarysuccess3 = sum(binary_test_pred3 != binary_test_labels)
+binarysuccess5 = sum(binary_test_pred5 != binary_test_labels)
+binarysuccess10 = sum(binary_test_pred10 != binary_test_labels)
+binarysuccess15 = sum(binary_test_pred15 != binary_test_labels)
+binarysuccess20 = sum(binary_test_pred20 != binary_test_labels)
+binarysuccess25 = sum(binary_test_pred25 != binary_test_labels)
+binarysuccess = c(binarysuccess3, binarysuccess5, binarysuccess10, binarysuccess15, binarysuccess20, binarysuccess25)
+successes = as.data.frame(binarysuccess)
+```
+
+```{r}
+trinarysuccess3 = sum(trinary_test_pred3 != trinary_test_labels)
+trinarysuccess5 = sum(trinary_test_pred5 != trinary_test_labels)
+trinarysuccess10 = sum(trinary_test_pred10 != trinary_test_labels)
+trinarysuccess15 = sum(trinary_test_pred15 != trinary_test_labels)
+trinarysuccess20 = sum(trinary_test_pred20 != trinary_test_labels)
+trinarysuccess25 = sum(trinary_test_pred25 != trinary_test_labels)
+trinarysuccess = c(trinarysuccess3, trinarysuccess5, trinarysuccess10, trinarysuccess15, trinarysuccess20, trinarysuccess25)
+successes$trinarysuccess = trinarysuccess
+successes$K = c(3, 5, 10, 15, 20, 25)
+```
+
+```{r}
+ggplot(successes, aes(x = K, y = binarysuccess)) + geom_line()
+```
+
+```{r}
+ggplot(successes, aes(x = K, y = trinarysuccess)) + geom_line()
+```
+
+
+###c. In later lessons, you will learn about linear classifiers. These algorithms work by defining a decision boundary that separates the different categories.###
+
+###Looking back at the plots of the data, do you think a linear classifier would work well on these datasets?###
+
+
+Yes, I do think that a linear classifier would work.
