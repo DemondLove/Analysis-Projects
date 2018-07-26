@@ -1,0 +1,198 @@
+---
+title: "Assignment 4.2"
+author: "Demond Love"
+date: "6/30/2018"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**As an aspiring Data Scientist, you have heard that a majority of the time you can expect to spend on data acquisition and cleanup, a.k.a data wrangling. For this assignment you will be working with some data that has been manually entered into Donations tracking documents for Washington D.C. and Nebraska.**
+
+
+```{r, results='hide', warning = FALSE, message = FALSE}
+library(ggplot2)
+library(readr)
+library(pastecs)
+library(ggm)
+library(dplyr)
+
+dc = read_csv('~/Documents/DSC 520 Statistics for Data Science/Week 4 DSC 520/donations-2015-2016-DC.txt')
+ne = read_csv('~/Documents/DSC 520 Statistics for Data Science/Week 4 DSC 520/donations-2015-2016-NE.txt')
+```
+```{r}
+head(dc, n = 8)
+```
+```{r}
+head(ne, n = 8)
+```
+
+**1. How many variables does the data set have, explain any peculiarities of the source data such as how missing values are discovered.**
+```{r}
+names(dc)
+```
+
+```{r}
+names(ne)
+```
+
+The dataset has 16 variables.
+
+```{r}
+sapply(dc, function(x) {sum(is.na(x))})
+```
+```{r}
+sapply(ne, function(x) {sum(is.na(x))})
+```
+
+There are a lot of NAs in the committee_party, donor_employer, and donor_occupation fields. I don't think that these are a surpisingly high number of NAs, due to people wanting protect their privacy. 
+
+**2. Data importing and cleaning steps are explained in the text and in the DataCamp exercises (tell me why you are doing the data cleaning activities that you perform) and follow a logical process.**
+
+Data Cleaning Process:
+
+1. Get a feel for the data
+```{r}
+class(ne)
+class(dc)
+```
+
+2. Summarize the data
+```{r}
+str(ne)
+```
+```{r}
+str(dc)
+```
+
+3. Take a closer look
+
+```{r}
+uniquedcparty_affiliation = distinct(select(ne, party_affiliation))
+uniquedcparty_affiliation
+```
+```{r}
+uniqueneparty_affiliation = distinct(select(dc, party_affiliation))
+uniqueneparty_affiliation
+```
+There are a different number of party affiliations. DC has OTH, W, and UNK included, but NE doesn't.
+```{r}
+sum(dc$donation_amount)
+```
+```{r}
+sum(ne$donation_amount)
+```
+Significantly more money was given in DC then NE.
+
+```{r}
+uniquedcpdonor_state = distinct(select(dc, donor_state))
+uniquedcpdonor_state
+```
+```{r}
+uniquenepdonor_state = distinct(select(ne, donor_state))
+uniquenepdonor_state
+```
+Each state file only consists of its state's data, so nothing out of the ordinary there.
+
+```{r}
+min(dc$year_of_election)
+```
+```{r}
+min(ne$year_of_election)
+```
+```{r}
+max(ne$year_of_election)
+```
+```{r}
+max(dc$year_of_election)
+```
+They have different ranges. DC is from 2008 - 2020 and NE is 2012 - 2020.
+```{r}
+ggplot(dc, aes(year_of_election)) + geom_histogram()
+```
+```{r}
+ggplot(ne, aes(year_of_election)) + geom_histogram()
+```
+Although the bulk of both files is in 2016, the year we are analyzing. there are some false years in both files. These will need to be removed. 
+
+```{r}
+dc2016 = subset(dc, year_of_election == 2016)
+```
+```{r}
+ne2016 = subset(ne, year_of_election == 2016)
+```
+Removed all non-2016 rows.
+
+```{r}
+range(dc2016$donation_amount)
+```
+```{r}
+range(ne2016$donation_amount)
+```
+
+They both have negative amounts. That doesn't make much sense. How can you give negative dollars? Are they getting money from a candidate. This will skew my results. There is more variance in NE than DC.
+```{r}
+nrow(dc)
+```
+```{r}
+nrow(ne)
+```
+
+There are over 3x the number of donations in DC, so that makes up the difference in sums.
+```{r}
+dc = subset(dc2016, donation_amount > 0)
+ne = subset(ne2016, donation_amount > 0)
+```
+
+```{r}
+head(dc)
+```
+```{r}
+```{r}
+uniquedccandidate_office = distinct(select(dc, candidate_office))
+uniquedccandidate_office
+```
+```{r}
+uniquenecandidate_office = distinct(select(ne, candidate_office))
+uniquenecandidate_office
+```
+
+**3. Once your data is clean, show what the ﬁnal data set looks like. However, do not print off a data frame with 200+ rows; show me the data in the most condensed form possible.**
+```{r}
+head(dc)
+```
+```{r}
+head(ne)
+```
+
+**4. Add a variable to your data set called Average Donation Amount. Calculate the Average Donation Amount per transaction and insert that value into a new data set.**
+```{r}
+dc$average_donation_amount = mean(dc$donation_amount)
+ne$average_donation_amount = mean(ne$donation_amount)
+```
+```{r}
+dc_average_donation_amount = mean(dc$donation_amount)
+ne_average_donation_amount = mean(ne$donation_amount)
+```
+
+**5. Provide summary information using the appropriate R function(s) about the Donation Amount variable in your cleaned data set. Provide a written summary paragraph that describes your findings.**
+```{r}
+summary(dc$donation_amount)
+```
+```{r}
+ggplot(dc, aes(dc$donation_amount)) + geom_density()
+```
+
+```{r}
+summary(ne$donation_amount)
+```
+```{r}
+ggplot(ne, aes(donation_amount)) + geom_density()
+```
+
+
+**Include all of your answers in a R Markdown report.**
