@@ -1,0 +1,120 @@
+---
+title: "Assignment 3.2 - Student Assignment Performance Data"
+author: "Demond Love"
+date: "6/24/2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, results = FALSE}
+library(readr)
+library(ggplot2)
+library(pastecs)
+
+path = file.path('/Users/Love/Documents/DSC 520 Statistics for Data Science/Week 3 DSC 520/DSC 520 Week 3/Exams.dat')
+file = read_tsv(path, col_names = TRUE)
+SELECT = subset(file, select = c(exam, computer, lectures, numeracy, stats, uni))
+
+```
+
+Grab statistics for each variable.
+
+```{r}
+stat.desc(SELECT)
+```
+
+The first three variables in the data are a percentage based on 100 points.
+
+```{r}
+qplot(SELECT$exam)
+```
+
+This distribution look bimodal.
+
+```{r}
+qplot(SELECT$computer)
+```
+
+This looks semi-normal; slight negative skew, but probably isn't statistically significant.
+
+```{r}
+qplot(SELECT$lectures)
+```
+
+This also looks semi-normal; slight negative skew, but probably isn't statistically significant.
+
+The fourth variable is based on a score achieved out of 15 points.
+
+```{r}
+qplot(SELECT$numeracy)
+```
+
+This looks significantly positively skewed.
+
+The stats variable are the letter grades for the Stats exam where A=1, B=2, C=3, D=4, F=5. 
+```{r}
+qplot(SELECT$stats)
+```
+
+This looks negatively skewed, since the mode value is a 5.
+
+Doesn't really make sense to plot uni, since the uni variable indicates which professor taught that section of the course. 0=Professor George, 1=Professor Jeff, and 3=Professor Tushmann.
+
+Next, compare variables for normality normality numerically.
+
+```{r}
+round(stat.desc(SELECT, basic = FALSE, norm = TRUE), digits = 3)
+```
+
+
+Comparing each professor against the grades in each exam.
+
+```{r}
+univexam = ggplot(SELECT, aes(x = uni, y = exam))
+univexam + geom_point() + geom_smooth()
+```
+
+Here, you can tell that Professor Jeff has significantlly higher scores on the first exam.
+
+```{r}
+univcomputer = ggplot(SELECT, aes(x = uni, y = computer))
+univcomputer + geom_smooth() + geom_point()
+```
+
+Although Professor George and Professor Jeff have simialr scores, you can see that Professor Tushmann's scores are lower on the second exam.
+
+```{r}
+univlectures = ggplot(SELECT, aes(x = uni, y = lectures))
+univlectures + geom_smooth() + geom_point()
+```
+
+Here, all three professor's students faired almost the same.
+
+Next, transforming the numeracy variable to correct it's positive skew.
+
+```{r}
+lognumeracy = log(SELECT$numeracy)
+qplot(lognumeracy)
+round(stat.desc(lognumeracy, basic = FALSE, norm = TRUE), digits = 3)
+```
+
+Looks like the log transformation seems to have worked, since skew.2SE decreased from 2.376 to -1.103. Although it is still showing statistically significant skewness, the variable is significantly more normal.
+
+And finally, we will run the Shapiro-Wilk test, and plot each variable accordingly.
+
+```{r}
+shapiro.test(SELECT$exam)
+qplot(SELECT$exam, stat = 'qq')
+shapiro.test(SELECT$computer)
+qplot(SELECT$computer, stat = 'qq')
+shapiro.test(SELECT$lectures)
+qplot(SELECT$lectures, stat = 'qq')
+shapiro.test(SELECT$numeracy)
+qplot(SELECT$numeracy, stat = 'qq')
+shapiro.test(SELECT$stats)
+qplot(SELECT$stats, stat = 'qq')
+```
+
