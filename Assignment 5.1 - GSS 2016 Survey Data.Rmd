@@ -1,0 +1,144 @@
+---
+title: "Assignment 5.1 - GSS 2016 Survey Data"
+author: "Demond Love"
+date: "7/4/2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, results='hide', warning = FALSE, message = FALSE}
+library(readr)
+library(ggplot2)
+library(pastecs)
+library(ggm)
+file = read_csv("/Users/Love/Documents/DSC 520 Statistics for Data Science/Week 5 DSC 520/gss-2016.csv")
+data = data.frame(file$SIBS, file$CHILDS)
+names(data) = c("SIBS", "CHILDS")
+data$SIBS = as.numeric(data$SIBS)
+data$CHILDS = as.numeric(data$CHILDS)
+```
+
+**Data for this assignment originated from the General Society Survey (GSS). The GSS gathers data on contemporary American society in order to monitor and explain trends and constants in attitudes, behaviors, and attributes. Hundreds of trends have been tracked since 1972. In addition, since the GSS adopted questions from earlier surveys, trends can be followed for up to 70 years. Only data from the 2016 GSS survey is included in this dataset – GSS2016.csv.**
+
+**If you are interested in getting at a different year or a cumulative dataset you can visit http://www.gss.norc.org A codebook for the GSS is available here: GSS_Codebook_Index.pdf and contains all of the GSS variables and descriptions.**
+
+**For this assignment, students will need to load and activate the ggplot2 package.**
+
+**As a data science intern with newly learned knowledge in skills in statistical correlation, regression and R programming, you are interested in looking at the GSS 2016 survey data, specifically, the Siblings and Childs variables have peaked your interest.**
+
+**The first question you are interested in answering is: “Is there a significant relationship between the number of siblings a survey respondent has and the number of his or her children?”**
+
+**Part 1**
+
+**a.	Construct a scatterplot of these two variables in R studio and place the best-fit linear regression line on the scatterplot. Describe the relationship between the number of siblings a respondent has (SIBS) and the number of his or her children (CHILDS).**
+```{r}
+ggplot(data, aes(SIBS, CHILDS)) + geom_point() + geom_smooth(method = "lm")
+```
+Based on the above graph, there is not a linear form to the data. The direction of the regression line is positive, but the strength is extremely weak. There are also an extreme outlier, in which an individual with 0 children had over 40 siblings.
+
+**b.	Use R to calculate the covariance of the two variables and provide an explanation of why you would use this calculation and what the results indicate.**
+```{r}
+round(cov(data, use = "pairwise.complete.obs"), digits = 2)
+```
+The covariance between these variables is 1.06. This figure is a measure of how these two variables covary, which is measure of how their variances align. Essentially, when one variable deviates from its mean, then if these varaiables were related, then we would expect the other variable to deviate from its mean in a similar way.
+
+**c.	Choose the type of correlation test to perform, explain why you chose this test, and make a prediction if the test yields a positive or negative correlation?**
+
+I am unable to use the Pearson correlation, since one of its basic assumptions of the underlying data is that it is normally distributed (tests shown in Part 1 - section g). Therefore, Spearman's correlation coefficient can be used when the data has violated parametric assumptions such as non-normally distributed data.
+
+**d.	Perform a correlation analysis of the two variables and describe what the calculations in the correlation matrix suggest about the relationship between the variables. Be specific with your explanation.**
+```{r}
+cor.test(data$SIBS, data$CHILDS, alternative = "less", method = "spearman")
+```
+The correlation coefficient here is 0.215, which indicates an extremely weak, positive correlation. With 0 meaning that there is no relationship and 1 meaning that there is a perfect, positive relationship, this is a very weak value. Moreover, the p-value on this is 1, which means that this correlation coefficient isn't statistically significant at all. Therefore, based on this analysis, there does appear to be little or no relationship between these variables, which is supported by the graphs above.
+
+**e.	Calculate the correlation coefficient and the coefficient of determination, describe what you conclude about the results.**
+```{r}
+cor(data$SIBS, data$CHILDS,use = "pairwise.complete.obs", method = "spearman")
+```
+```{r}
+cor(data$CHILDS, data$SIBS ,use = "pairwise.complete.obs", method = "spearman")^2*100
+```
+As opposed to the correlation coefficient, described earlier, the coefficient of determination is a measure of the amount of variablility in one variable that is shared by others.
+
+From this, you can see that only 4.6% of the variance in number of children is accounted for by number of siblings.
+
+**f.	Based on your analysis what can you say about the relationship between the number of siblings and the number of his or her children?**
+
+Based on the above analysis, I am seeing almost no relationship between these two variables, other than a very weak, positive relationship.
+
+**g.	Produce an appropriate graph for the variables. Report, critique and discuss the skewness and any significant scores found.**
+```{r}
+ggplot(data, aes(SIBS)) + geom_histogram()
+```
+```{r}
+round(stat.desc(data$SIBS, basic = FALSE, norm = TRUE), digits = 3)
+```
+```{r}
+ggplot(data, aes(CHILDS)) + geom_histogram()
+```
+```{r}
+round(stat.desc(data$CHILDS, basic = FALSE, norm = TRUE), digits = 3)
+```
+Both the variables are negatively skewed. Based on the above figures, the skewness is statistically significant at well above the p < .001 level.
+
+**h.	Expand your analysis to include a third variable – Sex. Perform a partial correlation, “controlling” the Sex variable. Explain how this changes your interpretation and explanation of the results.**
+```{r}
+datawsex = data.frame(file$SIBS, file$CHILDS, file$SEX)
+names(datawsex) = c("SIBS", "CHILDS", "SEX")
+datawsex$SIBS = as.numeric(datawsex$SIBS)
+datawsex$CHILDS = as.numeric(datawsex$CHILDS)
+datawsex$SEX = as.numeric(datawsex$SEX)
+datawsex = datawsex[complete.cases(datawsex),]
+```
+
+```{r}
+pc = pcor(c("SIBS", "CHILDS", "SEX"), var(datawsex))
+pc
+```
+```{r}
+pcor.test(pc, 1, 2856)
+```
+Whereas previously the correlation coefficient between number of siblings and number of children was 0.215; when controlling for the sex, the correlation coefficient actually dropped 0.197. Although its relationship has not improved, this is statisitcally significant (its p-value is quite a bit lower than the .05 confidence interval).
+
+**Part 2**
+
+**a.	Run a regression analysis where SIBS predicts CHILDS.**
+```{r}
+datamodel = lm(data$CHILDS ~ data$SIBS)
+summary(datamodel)
+```
+
+**b.	What are the intercept and the slope? What are the coefficient of determination and the correlation coefficient?**
+
+The intercept is 1.467767 and the slope is 0.103577. The coefficient of determination tells us that the number of siblings accounts for 3.954% of the variance in the number of children someone has.
+
+**c.	For this model, how do you explain the variation in the number of children someone has? What is the amount of variation not explained by the number of siblings?**
+
+This model isn't truly able to explain the variation in the number of children someone has, since over 96% of the variance in this variable is completely unexplained by the number of siblings that they have.
+
+**d.	Based on the calculated F-Ratio does this regression model result in a better prediction of the number of children than if you had chosen to use the mean value of siblings?**
+
+For these data, F is 117.5 , which is significan't at p < .001^4. Therefore, we conclude that our regression model results in significantly better predictions than the mean.
+
+**e.	Use the model to make a prediction: What is the predicted number of children for someone with three siblings?**
+```{r}
+coeffs = coefficients(datamodel)
+m = coeffs[2]
+b = coeffs[1]
+anspart2d = m*3 + b
+anspart2d
+```
+The predicted number of children for someone with three siblings is 1.778498, or rounded to the nearest integer would be 2 children.
+
+**f.	Use the model to make a prediction: What is the predicted number of children for someone without any siblings?**
+```{r}
+anspart2f = m*0 + b
+anspart2f
+```
+The predicted number of children for someone with no siblings is 1.467767, or rounded to the nearest integer would be 1 children. Of course, we could have been gotten this figure without the above formula, because this is always going to be the same as the same as the y-intercept coefficient.
+
+**Report and discuss all of your calculations and critiques using R Markdown.**
