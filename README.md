@@ -1,1 +1,1 @@
-# GitHub Repository for DSC 520 - Bellevue University
+# GitHub Repository for Personal Analysis Projects
