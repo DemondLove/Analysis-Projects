@@ -1,2 +1,2 @@
 # GitHub Repository for Personal Analysis Projects
-Personal side projects
+Personal side projects in Rmarkdown
