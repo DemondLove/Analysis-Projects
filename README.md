@@ -1,2 +1,2 @@
-# GitHub Repository for Personal Analysis Projects
+# GitHub Repository for R Analysis Projects
 Personal side projects in R
